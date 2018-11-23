@@ -46,10 +46,6 @@ class StmtList(Ast):
 class Stmt (Ast):
     """A single statement"""
     pass
-class SkipStmt (Stmt):
-    """A skip statement"""
-    def __eq__ (self, other):
-        return type(self) == type(other)
 
 class PrintStateStmt (Stmt):
     """Print state"""
@@ -113,7 +109,9 @@ class Func (Stmt):
     """Function call"""
     def __init__(self,name,args):
         self.args = args
-        self.name = name
+        #the name is parsed as a variable
+        #the function name is the variable's name
+        self.name = name.name
     def __eq__ (self, other):
         return type(self) == type(other) and \
             self.name == other.name  and \
@@ -369,10 +367,11 @@ class PrintVisitor (AstVisitor):
         if node.args is None or len(node.args) == 0 :
             self._write(')')
         else:
-            for s in node.args[1:]:
+            for s in node.args[0:-1]:
                 self.visit(s)
                 self._write(',')
-            self.write(')')
+            self.visit(node.args[-1])
+            self._write(')')
 
     def visit_AsgnStmt (self, node, *args, **kwargs):
         self.visit (node.lhs)
