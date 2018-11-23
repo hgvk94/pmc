@@ -1,0 +1,8 @@
+v:=func();
+f();
+while f(a,b,c)
+do
+  if( a = f())
+  then
+     i:=i+1.0;
+func(ohman,ohman2)
