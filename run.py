@@ -24,13 +24,14 @@ from __future__ import print_function
 
 import parser as parser
 import ast as ast
+import vccVisitor
 import semantics as sem
 
 import sys
 
 def main ():
     a = ast.parse_file (sys.argv [1])
-    pv = ast.PrintVisitor (out=sys.stdout)
+    pv = vccVisitor.VCGenVisitor (out=sys.stdout)
     pv.visit (a)
     sys.stdout.write ('\n')
 

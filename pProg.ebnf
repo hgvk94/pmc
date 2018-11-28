@@ -55,7 +55,7 @@ bterm = (op:'and').{args:bfactor}+;
 bfactor = arg:batom | op:'not' ~ arg:batom;
 batom = rexp | bool_const | '(' @:bexp ')' | func;
 
-bool_const = 'true' | 'false';
+bool_const = 'True' | 'False';
 rexp = lhs:aexp op:rop ~ rhs:aexp ;
         
 

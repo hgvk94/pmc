@@ -282,10 +282,10 @@ class pProgParser(Parser):
     def _bool_const_(self):
         with self._choice():
             with self._option():
-                self._token('true')
+                self._token('True')
             with self._option():
-                self._token('false')
-            self._error('expecting one of: false true')
+                self._token('False')
+            self._error('expecting one of: False True')
 
     @graken()
     def _rexp_(self):

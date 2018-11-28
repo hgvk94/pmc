@@ -45,7 +45,10 @@ class StmtList(Ast):
 
 class Stmt (Ast):
     """A single statement"""
-    pass
+    def __init__(self):
+        self.pre_label='h0'
+        self.post_label='h0'
+        self.pre_label_next='h`0'
 
 class PrintStateStmt (Stmt):
     """Print state"""
@@ -55,6 +58,7 @@ class PrintStateStmt (Stmt):
 class AsgnStmt (Stmt):
     """An assignment statement"""
     def __init__(self, lhs, rhs):
+        Stmt.__init__(self)
         self.lhs = lhs
         self.rhs = rhs
     def __eq__ (self, other):
@@ -65,6 +69,7 @@ class AsgnStmt (Stmt):
 class IfStmt (Stmt):
     """If-then-else statement"""
     def __init__ (self, cond, then_stmt, else_stmt=None):
+        Stmt.__init__(self)
         self.cond = cond
         self.then_stmt = then_stmt
         self.else_stmt = else_stmt
@@ -79,6 +84,7 @@ class IfStmt (Stmt):
 class WhileStmt (Stmt):
     """While statement"""
     def __init__(self, cond, body, inv = None):
+        Stmt.__init__(self)
         self.cond = cond
         self.body = body
         self.inv = inv
@@ -92,6 +98,7 @@ class WhileStmt (Stmt):
 class AssertStmt (Stmt):
     """Assert statement"""
     def __init__ (self, cond):
+        Stmt.__init__(self)
         self.cond = cond
     def __eq__ (self, other):
         return type(self) == type(other) and \
@@ -100,6 +107,7 @@ class AssertStmt (Stmt):
 class AssumeStmt (Stmt):
     """Assume statement"""
     def __init__ (self, cond):
+        Stmt.__init__(self)
         self.cond = cond
     def __eq__ (self, other):
         return type(self) == type(other) and \
@@ -108,6 +116,7 @@ class AssumeStmt (Stmt):
 class Func (Stmt):
     """Function call"""
     def __init__(self,name,args):
+        Stmt.__init__(self)
         self.args = args
         #the name is parsed as a variable
         #the function name is the variable's name
@@ -120,6 +129,7 @@ class Func (Stmt):
 class HavocStmt (Stmt):
     """Havoc statement"""
     def __init__ (self, var_list):
+        Stmt.__init__(self)
         self.vars = var_list
     def __eq__ (self, other):
         return type(self) == type(other) and \
