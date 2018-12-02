@@ -46,9 +46,12 @@ class StmtList(Ast):
 class Stmt (Ast):
     """A single statement"""
     def __init__(self):
-        self.pre_label='h0'
-        self.post_label='h0'
-        self.pre_label_next='h`0'
+        self.pre_label=None
+        self.post_label=None
+    def addPre(self,pre):
+        self.pre_label=pre    
+    def addPost(self,post):
+        self.post_label=post
 
 class PrintStateStmt (Stmt):
     """Print state"""
@@ -88,6 +91,9 @@ class WhileStmt (Stmt):
         self.cond = cond
         self.body = body
         self.inv = inv
+    
+    def addInv(self,inv):
+        self.inv=inv
 
     def __eq__ (self, other):
         return type(self) == type(other) and \

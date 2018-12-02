@@ -6,8 +6,16 @@ do
   {
   if( va = 6)
   then
-     vb:= 7
+     if( i=10)
+     then 
+     	vb:= 7
+     else
+       vb:=8
   else
-	vb:=va+1;
+	{
+		vb:=va+1;
+		va:=vb
+	};
   i:=i+1
   }
+assert(va=10)

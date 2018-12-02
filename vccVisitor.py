@@ -10,7 +10,6 @@ class VCGenVisitor (ast.AstVisitor):
     """A VC gen visitor"""
     def __init__ (self, out = None):
         super (VCGenVisitor, self).__init__ ()
-        #TODO change this to (ordered) mappings from variables to their SSA
         if out is None:
             self.out = sys.stdout
         else:
@@ -66,36 +65,46 @@ class VCGenVisitor (ast.AstVisitor):
             return
 
         indent_lvl = kwargs['indent']
-        if len (node.stmts) > 1:
-            self._indent (**kwargs)
-            self._write('{\n')
-            indent_lvl = indent_lvl + 2
 
         self._indent (indent=indent_lvl)
-        self.visit (node.stmts [0], indent=kwargs['indent'] + 2)
-        self._write(' -->' + node.stmts[0].post_label)
-
+        #if stmt0 has precond, assert it
+        if node.stmts[0].pre_label:
+                self._write(node.stmts[0].pre_label)
+        self.visit (node.stmts[0], indent=kwargs['indent'] + 2)
+        if kwargs['create_horn']:
+            #top level statement
+            self._write(' -->' + node.stmts[0].post_label)
 
         if len (node.stmts) > 1:
             for s in node.stmts[1:]:
-                self._write (';\n')
-                self._indent (indent=indent_lvl)
+                if kwargs['create_horn']:
+                    self._write (';\n')
+                    self._indent (indent=indent_lvl)
+                else:
+                    self._write(' and ')
                 #TODO this does not support nested while loops
-                if s.__class__.__name__ == 'WhileStmt':
-                    self._write(s.pre_label + ' and ')
-                    self.visit(s.cond,negate=True) 
-                    self._write(' --> '+s.post_label)
-                self._write(s.pre_label + ' and ')
-                self.visit (s, indent=indent_lvl)
-                if s.__class__.__name__ == 'WhileStmt':
-                    self._write(' -->' + s.pre_label_next)
-                else : 
-                    self._write(' -->' + s.post_label)
-
-        if len (node.stmts) > 1:
-            self._write ('\n')
-            self._indent (**kwargs)
-            self._write ('}')
+                if kwargs['create_horn']:
+                    if s.__class__.__name__ == 'WhileStmt':
+                        #post label holds after exit
+                        self._indent(indent=indent_lvl)
+                        self._write(s.inv + ' and ')
+                        self.visit(s.cond,negate=True) 
+                        self._write(' --> '+s.post_label+';\n')
+                        #pre label implies inv
+                        self._indent(indent=indent_lvl)
+                        self._write(s.pre_label + ' --> ' + s.inv+';\n')
+                        #inv holds after one transition
+                        self._indent(indent=indent_lvl)
+                        self._write(s.inv + ' and ')
+                        self.visit (s, indent=indent_lvl)
+                        self._write(' -->' + s.inv+';\n')
+                    else : 
+                        #pre label and condition implies post label 
+                        self._write(s.pre_label + ' and ')
+                        self.visit (s, indent=indent_lvl)
+                        self._write(' -->' + s.post_label)
+                else:
+                    self.visit(s,indent=indent_lvl)
 
     def visit_Func(self,node,*args,**kwargs):
         self._write(node.name+'(')
@@ -107,19 +116,6 @@ class VCGenVisitor (ast.AstVisitor):
                 self._write(',')
             self.visit(node.args[-1])
             self._write(')')
-
-    def create_horn_head (self,create_prev=True):
-        if self.prev_horn:
-            self._write(' and ' + self.prev_horn)
-        new_horn_head='h'+str(self.count)+'( '
-        var_list=list(self.vars)
-        new_horn_head = new_horn_head + var_list[0]
-        for f in var_list[1:]:
-            new_horn_head = new_horn_head + ',' + f
-        new_horn_head = new_horn_head + ' )'
-        self._write(' --> ' + new_horn_head + '\n')
-        if create_prev:
-            self.prev_horn=new_horn_head
 
     def visit_AsgnStmt (self, node, *args, **kwargs):
         self.visit (node.lhs)
@@ -141,21 +137,17 @@ class VCGenVisitor (ast.AstVisitor):
             self._write('( ( ')
         self.visit (node.cond, no_brkt=True)
         self._write(' and ')
-        self.visit (node.then_stmt)
+        self.visit (node.then_stmt,create_horn=False)
         if node.has_else ():
             self._write(') or ( ')
             self.visit (node.cond, negate=True)
             self._write(' and ')
-            self.visit (node.else_stmt)
+            self.visit (node.else_stmt,create_horn=False)
             self._write(') )')
 
     def visit_WhileStmt (self, node, *args, **kwargs):
         #TODO does not support nested while loops
+        assert(node.body.__class__.__name__!='WhileStmt')
         self.visit (node.cond, no_brkt=True)
-        if node.body.__class__.__name__=='StmtList':
-            for s in node.body.stmts:
-                self._write(' and ')
-                self.visit(s)
-        else:
-            self._write(' and ')
-            self.visit(node.body)
+        self._write(' and ')
+        self.visit (node.body,create_horn=False)

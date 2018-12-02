@@ -25,14 +25,19 @@ from __future__ import print_function
 import parser as parser
 import ast as ast
 import vccVisitor
+import labelVisitor
 import semantics as sem
 
 import sys
 
 def main ():
     a = ast.parse_file (sys.argv [1])
+    lv=labelVisitor.LabelVisitor()
+    b=lv.visit(a,createLabel=True)
+    print('AST after label visitor')
+    print(b)
     pv = vccVisitor.VCGenVisitor (out=sys.stdout)
-    pv.visit (a)
+    pv.visit (b)
     sys.stdout.write ('\n')
 
     b = ast.parse_string (str (a))
