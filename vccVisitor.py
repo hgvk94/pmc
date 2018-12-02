@@ -88,7 +88,7 @@ class VCGenVisitor (ast.AstVisitor):
                         #post label holds after exit
                         self._indent(indent=indent_lvl)
                         self._write(s.inv + ' and ')
-                        self.visit(s.cond,negate=True) 
+                        self.visit(s.cond,negate=True)
                         self._write(' --> '+s.post_label+';\n')
                         #pre label implies inv
                         self._indent(indent=indent_lvl)
@@ -97,9 +97,9 @@ class VCGenVisitor (ast.AstVisitor):
                         self._indent(indent=indent_lvl)
                         self._write(s.inv + ' and ')
                         self.visit (s, indent=indent_lvl)
-                        self._write(' -->' + s.inv+';\n')
+                        self._write(' -->' + s.inv)
                     else : 
-                        #pre label and condition implies post label 
+                        #pre label and condition implies post label
                         self._write(s.pre_label + ' and ')
                         self.visit (s, indent=indent_lvl)
                         self._write(' -->' + s.post_label)
@@ -123,7 +123,7 @@ class VCGenVisitor (ast.AstVisitor):
         self.visit (node.rhs, no_brkt=True)
 
     def visit_AssertStmt (self, node, *args, **kwargs):
-        self.visit (node.cond, no_brkt=True,negate=True)
+        self.visit (node.cond,negate=True)
 
     def visit_AssumeStmt (self, node, *args, **kwargs):
         self._write ('assume ')

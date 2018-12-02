@@ -64,12 +64,11 @@ class LabelVisitor (ast.AstVisitor):
                 stmt=self.visit(s)
                 if kwargs['createLabel']:
                     stmt.addPre(self.pre)
-                if kwargs['createLabel']:
                     self.count=self.count+1 
-                    l=self.createLabel()
                     if stmt.__class__.__name__=='WhileStmt':
                         stmt.addInv(self.createLabel(label='inv'))
                     #the order matters :(
+                    l=self.createLabel()
                     stmt.addPost(l)
                 new_stmt_lists.append(stmt)
         return ast.StmtList(new_stmt_lists)

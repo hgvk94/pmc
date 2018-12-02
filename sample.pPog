@@ -16,6 +16,6 @@ do
 		vb:=va+1;
 		va:=vb
 	};
-  i:=i+1
-  }
-assert(va=10)
+  i2:=i+1
+  };
+assert va=10
