@@ -12,11 +12,12 @@ class LabelVisitor (ast.AstVisitor):
         self.count=0
         self.pre=None
         super (LabelVisitor, self).__init__ ()
+        self.labels=[]
 
     def print_vars(self):
         st=self.vars[0]
         for v in self.vars[1:]:
-            st=st+','+v
+            st=st+' '+v
         return st
     def add_var(self,v):
         if not v in self.vars:
@@ -36,9 +37,25 @@ class LabelVisitor (ast.AstVisitor):
     def visit_Exp (self, node, *args, **kwargs):
         return node
 
+    def get_var_declr(self):
+        #all variables are Int
+        #TODO support types as well
+        declare_var_strings=[]
+        for v in self.vars:
+            declare_var_strings.append('(declare-var '+v + ' Int)')
+        return declare_var_strings
+
+    def get_rel_declr(self):
+        return self.labels
+
     def createLabel(self,label='h'):
-        label_string=label+str(self.count)+'('+self.print_vars()+')'
+        label_string='( '+label+str(self.count)+' '+self.print_vars()+' )'
         self.pre=label_string
+        label_def='(declare-rel ' + label+str(self.count)+' (Int'
+        for f in self.vars[1:]:
+            label_def=label_def+' Int'
+        label_def=label_def+') )'
+        self.labels.append(label_def)
         return label_string
 
     def visit_StmtList (self, node, *args, **kwargs):

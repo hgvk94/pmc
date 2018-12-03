@@ -49,14 +49,14 @@ class VCGenVisitor (ast.AstVisitor):
             self._write (node.op)
             self.visit (node.arg (0))
         else:
-            self._open_brkt (**kwargs)
+            self._write ('( ')
+            self._write (node.op)
+            self._write (' ')
             self.visit (node.arg (0))
             for a in node.args [1:]:
                 self._write (' ')
-                self._write (node.op)
-                self._write (' ')
                 self.visit (a)
-            self._close_brkt (**kwargs)
+            self._write (' )')
         if kwargs['negate']:
             self._write(' )')
 
@@ -68,43 +68,39 @@ class VCGenVisitor (ast.AstVisitor):
 
         self._indent (indent=indent_lvl)
         #if stmt0 has precond, assert it
-        if node.stmts[0].pre_label:
-                self._write(node.stmts[0].pre_label)
-        self.visit (node.stmts[0], indent=kwargs['indent'] + 2)
+        if node.stmts[0].pre_label and kwargs['create_horn']:
+                self._write( '( rule ' + node.stmts[0].pre_label +' )\n')
+        if kwargs['create_horn']:
+            self._write('( rule (=> ')
+        self.visit (node.stmts[0])
         if kwargs['create_horn']:
             #top level statement
-            self._write(' -->' + node.stmts[0].post_label)
+            self._write(' '+node.stmts[0].post_label + ' ))')
 
         if len (node.stmts) > 1:
             for s in node.stmts[1:]:
-                if kwargs['create_horn']:
-                    self._write (';\n')
-                    self._indent (indent=indent_lvl)
-                else:
-                    self._write(' and ')
                 #TODO this does not support nested while loops
                 if kwargs['create_horn']:
+                    self._write ('\n')
                     if s.__class__.__name__ == 'WhileStmt':
                         #post label holds after exit
-                        self._indent(indent=indent_lvl)
-                        self._write(s.inv + ' and ')
+                        self._write('( rule (=> ( and ' + s.inv + ' ')
                         self.visit(s.cond,negate=True)
-                        self._write(' --> '+s.post_label+';\n')
+                        self._write(' ) '+s.post_label+'))\n')
                         #pre label implies inv
-                        self._indent(indent=indent_lvl)
-                        self._write(s.pre_label + ' --> ' + s.inv+';\n')
+                        self._write('( rule (=> ' + s.pre_label + ' ' + s.inv+'))\n')
                         #inv holds after one transition
-                        self._indent(indent=indent_lvl)
-                        self._write(s.inv + ' and ')
-                        self.visit (s, indent=indent_lvl)
-                        self._write(' -->' + s.inv)
+                        self._write('( rule (=> ( and ' + s.inv + ' ')
+                        self.visit (s)
+                        self._write(' ) ' + s.inv + ' ))')
                     else : 
                         #pre label and condition implies post label
-                        self._write(s.pre_label + ' and ')
-                        self.visit (s, indent=indent_lvl)
-                        self._write(' -->' + s.post_label)
+                        self._write('( rule (=> ( and ')
+                        self._write(s.pre_label+ ' ')
+                        self.visit (s)
+                        self._write(') ' + s.post_label + '))')
                 else:
-                    self.visit(s,indent=indent_lvl)
+                    self.visit(s)
 
     def visit_Func(self,node,*args,**kwargs):
         self._write(node.name+'(')
@@ -118,9 +114,11 @@ class VCGenVisitor (ast.AstVisitor):
             self._write(')')
 
     def visit_AsgnStmt (self, node, *args, **kwargs):
+        self._write ('( = ')
         self.visit (node.lhs)
-        self._write (' = ')
+        self._write(' ')
         self.visit (node.rhs, no_brkt=True)
+        self._write(' )')
 
     def visit_AssertStmt (self, node, *args, **kwargs):
         self.visit (node.cond,negate=True)
@@ -134,20 +132,24 @@ class VCGenVisitor (ast.AstVisitor):
 
     def visit_IfStmt (self, node, *args, **kwargs):
         if node.has_else ():
-            self._write('( ( ')
+            self._write('( or ')
+        self._write('( and ')
         self.visit (node.cond, no_brkt=True)
-        self._write(' and ')
+        self._write(' ')
         self.visit (node.then_stmt,create_horn=False)
+        self._write(' )')
         if node.has_else ():
-            self._write(') or ( ')
+            self._write('( and ')
             self.visit (node.cond, negate=True)
-            self._write(' and ')
+            self._write(' ')
             self.visit (node.else_stmt,create_horn=False)
             self._write(') )')
 
     def visit_WhileStmt (self, node, *args, **kwargs):
         #TODO does not support nested while loops
         assert(node.body.__class__.__name__!='WhileStmt')
+        self._write('( and ')
         self.visit (node.cond, no_brkt=True)
-        self._write(' and ')
+        self._write(' ')
         self.visit (node.body,create_horn=False)
+        self._write(' )')

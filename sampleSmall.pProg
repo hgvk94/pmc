@@ -1,4 +1,4 @@
-v:=5;
+v:=11;
 i:=9;
 va:=v+1;
 while va<10
@@ -6,16 +6,9 @@ do
   {
   if( va = 6)
   then
-     if( i=10)
-     then 
      	vb:= 7
-     else
-       vb:=8
   else
-	{
-		vb:=va+1;
-		va:=vb
-	};
+		  vb:=8;
   i2:=i+1
   };
 assert va=10

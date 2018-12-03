@@ -34,8 +34,12 @@ def main ():
     a = ast.parse_file (sys.argv [1])
     lv=labelVisitor.LabelVisitor()
     b=lv.visit(a,createLabel=True)
-    print('AST after label visitor')
-    print(b)
+    rels = lv.get_rel_declr()
+    for f in rels:
+    	print(f)
+    decl_vars = lv.get_var_declr()
+    for f in decl_vars:
+    	print(f)
     pv = vccVisitor.VCGenVisitor (out=sys.stdout)
     pv.visit (b)
     sys.stdout.write ('\n')
