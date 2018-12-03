@@ -48,7 +48,12 @@ class LabelVisitor (ast.AstVisitor):
     def get_rel_declr(self):
         return self.labels
 
-    def createLabel(self,label='h'):
+    def createLabel(self,label='h',error=False):
+        if error :
+            label_string='Error'
+            label_def='(declare-rel Error ( ))'
+            self.labels.append(label_def)
+            return label_string
         label_string='( '+label+str(self.count)+' '+self.print_vars()+' )'
         self.pre=label_string
         label_def='(declare-rel ' + label+str(self.count)+' (Int'
@@ -85,7 +90,10 @@ class LabelVisitor (ast.AstVisitor):
                     if stmt.__class__.__name__=='WhileStmt':
                         stmt.addInv(self.createLabel(label='inv'))
                     #the order matters :(
-                    l=self.createLabel()
+                    if stmt.__class__.__name__=='AssertStmt':
+                        l=self.createLabel(error=True)
+                    else:
+                        l=self.createLabel()
                     stmt.addPost(l)
                 new_stmt_lists.append(stmt)
         return ast.StmtList(new_stmt_lists)

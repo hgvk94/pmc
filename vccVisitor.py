@@ -101,6 +101,7 @@ class VCGenVisitor (ast.AstVisitor):
                         self._write(') ' + s.post_label + '))')
                 else:
                     self.visit(s)
+        self._write ('\n')
 
     def visit_Func(self,node,*args,**kwargs):
         self._write(node.name+'(')

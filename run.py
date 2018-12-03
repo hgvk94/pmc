@@ -32,6 +32,7 @@ import sys
 
 def main ():
     a = ast.parse_file (sys.argv [1])
+    print('(set-option :fixedpoint.engine spacer)')
     lv=labelVisitor.LabelVisitor()
     b=lv.visit(a,createLabel=True)
     rels = lv.get_rel_declr()
@@ -42,13 +43,7 @@ def main ():
     	print(f)
     pv = vccVisitor.VCGenVisitor (out=sys.stdout)
     pv.visit (b)
-    sys.stdout.write ('\n')
-
-    b = ast.parse_string (str (a))
-
-    print (b)
-
-    print ('a == b', a == b, 'a is b', a is b)
-    
+    print('(query Error)')
+  
 if __name__ == '__main__':
     main ()
