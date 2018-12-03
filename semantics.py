@@ -44,7 +44,7 @@ class pProgSemantics (object):
         return myAst.AssertStmt (ast.cond)
 
     def func (self, ast, *args, **kwargs):
-        return myAst.Func(ast.nm,ast.args)
+        return myAst.Func(ast.var,ast.nm,ast.args)
 
     def assume_stmt (self, ast, *args, **kwargs):
         return myAst.AssumeStmt (ast.cond)
@@ -103,6 +103,10 @@ class pProgSemantics (object):
         else:
             num = str(ast)
         return myAst.FloatConst (float (num))
+
+    def func_name ( self, ast, *args,**kwargs):
+        print("reached func_name")
+        return str(ast)
 
     def neg_number (self, ast, *args, **kwargs):
         return myAst.FloatConst (-1 * ast.val)

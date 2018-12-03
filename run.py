@@ -27,23 +27,30 @@ import ast as ast
 import vccVisitor
 import labelVisitor
 import semantics as sem
-
+import scipy.stats
 import sys
 
 def main ():
     a = ast.parse_file (sys.argv [1])
-    print('(set-option :fixedpoint.engine spacer)')
+    print(a)
+    st='(set-option :fixedpoint.engine spacer)\n'
     lv=labelVisitor.LabelVisitor()
     b=lv.visit(a,createLabel=True)
+    new_func=[]
+    for f in lv.pd:
+    	f.add_bounds(5,6)
+    	new_func.append(f)
     rels = lv.get_rel_declr()
     for f in rels:
-    	print(f)
+    	st=st+f+'\n'
     decl_vars = lv.get_var_declr()
     for f in decl_vars:
-    	print(f)
-    pv = vccVisitor.VCGenVisitor (out=sys.stdout)
+    	st=st+f+'\n'
+    pv = vccVisitor.VCGenVisitor (out=st,func_repl=new_func)
     pv.visit (b)
-    print('(query Error)')
-  
+    st=pv.out
+    st=st+'(query Error)\n'
+    print(st)
+
 if __name__ == '__main__':
     main ()

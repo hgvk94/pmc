@@ -8,17 +8,17 @@ for now, just print the horn clauses.
 """
 class VCGenVisitor (ast.AstVisitor):
     """A VC gen visitor"""
-    def __init__ (self, out = None):
+    def __init__ (self, out = None,func_repl=None):
         super (VCGenVisitor, self).__init__ ()
+        self.func_repl=func_repl
         if out is None:
             self.out = sys.stdout
         else:
             self.out = out
-
     def _indent (self, **kwargs):
         self._write (' '*kwargs['indent'])
     def _write (self, v):
-        self.out.write (str (v))
+        self.out = self.out + str (v)
     def _open_brkt (self, **kwargs):
         if not kwargs['no_brkt']:
             self._write ('(')
@@ -104,15 +104,17 @@ class VCGenVisitor (ast.AstVisitor):
         self._write ('\n')
 
     def visit_Func(self,node,*args,**kwargs):
-        self._write(node.name+'(')
-        if node.args is None or len(node.args) == 0 :
-            self._write(')')
-        else:
-            for s in node.args[0:-1]:
-                self.visit(s)
-                self._write(',')
-            self.visit(node.args[-1])
-            self._write(')')
+        for f in self.func_repl:
+            if f == node:
+                assert(f.ub or f.lb)
+                if f.ub and f.lb:
+                    self._write('( and ')
+                if f.ub:
+                    self._write('(< ' + node.var.name + ' ' +str(f.ub) + ') ')
+                if f.lb:
+                    self._write('(>= ' + node.var.name +' ' +str(f.lb) + ') ')
+                if f.ub and f.lb:
+                    self._write(' )')
 
     def visit_AsgnStmt (self, node, *args, **kwargs):
         self._write ('( = ')

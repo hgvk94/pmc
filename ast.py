@@ -121,14 +121,24 @@ class AssumeStmt (Stmt):
 
 class Func (Stmt):
     """Function call"""
-    def __init__(self,name,args):
+    def __init__(self,var,name,args):
+        print("calling a function")
         Stmt.__init__(self)
         self.args = args
         #the name is parsed as a variable
         #the function name is the variable's name
-        self.name = name.name
+        self.name = name
+        self.var = var
+        self.signature=var
+        self.lb=None
+        self.ub=None
+    def add_bounds(self, lb=None,ub=None):
+        self.lb=lb
+        self.ub=ub
+
     def __eq__ (self, other):
         return type(self) == type(other) and \
+            self.var == other.var  and \
             self.name == other.name  and \
             self.args == other.args
 
@@ -379,6 +389,7 @@ class PrintVisitor (AstVisitor):
             self._write ('}')
 
     def visit_Func(self,node,*args,**kwargs):
+        self._write(node.var.name+' := ')
         self._write(node.name+'(')
         if node.args is None or len(node.args) == 0 :
             self._write(')')

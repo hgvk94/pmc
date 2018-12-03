@@ -30,14 +30,14 @@ start
 
 stmt_list = ';'.{stmt}+;
 
-stmt = asgn_stmt   |
+stmt = func        |
+       asgn_stmt   |
        block_stmt  |
        if_stmt     |
        while_stmt  |
        assert_stmt |
        assume_stmt |
-       havoc_stmt  |
-       func ;
+       havoc_stmt  ;
        
 asgn_stmt = lhs:name ':=' rhs:exp ;
 exp = aexp | bexp ;
@@ -53,7 +53,7 @@ var_list = ','.{name}+;
 bexp = (op:'or').{args:bterm}+ ;
 bterm = (op:'and').{args:bfactor}+;
 bfactor = arg:batom | op:'not' ~ arg:batom;
-batom = rexp | bool_const | '(' @:bexp ')' | func;
+batom = rexp | bool_const | '(' @:bexp ')';
 
 bool_const = 'True' | 'False';
 rexp = lhs:aexp op:rop ~ rhs:aexp ;
@@ -61,7 +61,7 @@ rexp = lhs:aexp op:rop ~ rhs:aexp ;
 
 rop = '<=' | '<' | '=' | '>=' | '>'  ;
 
-aexp = func | addition | subtraction | term ;
+aexp = addition | subtraction | term ;
 addition = lhs:term op:'+' ~ rhs:aexp;
 subtraction = lhs:term op:'-' ~ rhs:aexp;
 term = mult | division | factor;
@@ -70,9 +70,10 @@ division = lhs:factor op:'/' ~ rhs:term;
 factor = atom | neg_number | '(' @:aexp ')';
 neg_number = '-' ~ @:number;
 
-atom = name | number | func;
-func = nm:name'('  args:args_list ')';
-args_list = @:','.{name|exp}*;
+atom = name | number ;
+func = var:name ':=' nm:fn_name '('  args:args_list ')';
+args_list = @:','.{factor}+;
+fn_name = 'gauss';
 name
     =
     NAME

@@ -9,6 +9,7 @@ class LabelVisitor (ast.AstVisitor):
     """Labels each statement"""
     def __init__ (self, out = None):
         self.vars=[]
+        self.pd=[]
         self.count=0
         self.pre=None
         super (LabelVisitor, self).__init__ ()
@@ -99,15 +100,9 @@ class LabelVisitor (ast.AstVisitor):
         return ast.StmtList(new_stmt_lists)
 
     def visit_Func(self,node,*args,**kwargs):
-        self._write(node.name+'(')
-        if node.args is None or len(node.args) == 0 :
-            self._write(')')
-        else:
-            for s in node.args[0:-1]:
-                self.visit(s)
-                self._write(',')
-            self.visit(node.args[-1])
-            self._write(')')
+        self.add_var(node.var.name)
+        self.pd.append(node)
+        return node
 
     def visit_AsgnStmt (self, node, *args, **kwargs):
         self.add_var(node.lhs.name)

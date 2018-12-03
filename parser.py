@@ -94,6 +94,8 @@ class pProgParser(Parser):
     def _stmt_(self):
         with self._choice():
             with self._option():
+                self._func_()
+            with self._option():
                 self._asgn_stmt_()
             with self._option():
                 self._block_stmt_()
@@ -107,8 +109,6 @@ class pProgParser(Parser):
                 self._assume_stmt_()
             with self._option():
                 self._havoc_stmt_()
-            with self._option():
-                self._func_()
             self._error('no available options')
 
     @graken()
@@ -274,8 +274,6 @@ class pProgParser(Parser):
                 self._bexp_()
                 self.name_last_node('@')
                 self._token(')')
-            with self._option():
-                self._func_()
             self._error('no available options')
 
     @graken()
@@ -319,8 +317,6 @@ class pProgParser(Parser):
     @graken()
     def _aexp_(self):
         with self._choice():
-            with self._option():
-                self._func_()
             with self._option():
                 self._addition_()
             with self._option():
@@ -424,20 +420,21 @@ class pProgParser(Parser):
                 self._name_()
             with self._option():
                 self._number_()
-            with self._option():
-                self._func_()
             self._error('no available options')
 
     @graken()
     def _func_(self):
         self._name_()
+        self.name_last_node('var')
+        self._token(':=')
+        self._fn_name_()
         self.name_last_node('nm')
         self._token('(')
         self._args_list_()
         self.name_last_node('args')
         self._token(')')
         self.ast._define(
-            ['args', 'nm'],
+            ['args', 'nm', 'var'],
             []
         )
 
@@ -448,14 +445,13 @@ class pProgParser(Parser):
             self._token(',')
 
         def block1():
-            with self._choice():
-                with self._option():
-                    self._name_()
-                with self._option():
-                    self._exp_()
-                self._error('no available options')
-        self._gather(block1, sep1)
+            self._factor_()
+        self._positive_gather(block1, sep1)
         self.name_last_node('@')
+
+    @graken()
+    def _fn_name_(self):
+        self._token('gauss')
 
     @graken()
     def _name_(self):
@@ -574,6 +570,9 @@ class pProgSemantics(object):
         return ast
 
     def args_list(self, ast):
+        return ast
+
+    def fn_name(self, ast):
         return ast
 
     def name(self, ast):
