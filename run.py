@@ -32,24 +32,32 @@ import sys
 
 def main ():
     a = ast.parse_file (sys.argv [1])
-    print(a)
-    st='(set-option :fixedpoint.engine spacer)\n'
+    #initial run of the visitor. Label each node, figure out prob distibutions and error prob
     lv=labelVisitor.LabelVisitor()
     b=lv.visit(a,createLabel=True)
+    #collect error prob
+    error_prob = lv.prob
+   	#compute lb and ub
+   	#needs to be inside a while loop
     new_func=[]
-    print(lv.prob)
     for f in lv.pd:
     	f.add_bounds(5,6)
     	new_func.append(f)
+	#begin creating horn clauses 
+	st='(set-option :fixedpoint.engine spacer)\n'
+	#declare relations in SMT2
     rels = lv.get_rel_declr()
     for f in rels:
     	st=st+f+'\n'
+	#declare vars in SMT2
     decl_vars = lv.get_var_declr()
     for f in decl_vars:
     	st=st+f+'\n'
+	#declare rules in SMT2 
     pv = vccVisitor.VCGenVisitor (out=st,func_repl=new_func)
     pv.visit (b)
     st=pv.out
+    #query error
     st=st+'(query Error)\n'
     print(st)
 
