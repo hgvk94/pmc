@@ -41,7 +41,7 @@ class pProgSemantics (object):
         return myAst.WhileStmt (ast.cond, ast.body, ast.inv)
 
     def assert_stmt (self, ast, *args, **kwargs):
-        return myAst.AssertStmt (ast.cond)
+        return myAst.AssertStmt (ast.cond,ast.prob)
 
     def func (self, ast, *args, **kwargs):
         return myAst.Func(ast.var,ast.nm,ast.args)

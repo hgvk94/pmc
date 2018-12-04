@@ -173,10 +173,15 @@ class pProgParser(Parser):
     @graken()
     def _assert_stmt_(self):
         self._token('assert')
+        self._token('(')
         self._bexp_()
         self.name_last_node('cond')
+        self._token(',')
+        self._num_()
+        self.name_last_node('prob')
+        self._token(')')
         self.ast._define(
-            ['cond'],
+            ['cond', 'prob'],
             []
         )
 
@@ -414,6 +419,15 @@ class pProgParser(Parser):
         self.name_last_node('@')
 
     @graken()
+    def _num_(self):
+        with self._choice():
+            with self._option():
+                self._neg_number_()
+            with self._option():
+                self._number_()
+            self._error('no available options')
+
+    @graken()
     def _atom_(self):
         with self._choice():
             with self._option():
@@ -445,7 +459,7 @@ class pProgParser(Parser):
             self._token(',')
 
         def block1():
-            self._factor_()
+            self._num_()
         self._positive_gather(block1, sep1)
         self.name_last_node('@')
 
@@ -561,6 +575,9 @@ class pProgSemantics(object):
         return ast
 
     def neg_number(self, ast):
+        return ast
+
+    def num(self, ast):
         return ast
 
     def atom(self, ast):

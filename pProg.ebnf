@@ -44,8 +44,8 @@ exp = aexp | bexp ;
 block_stmt = '{' @:stmt_list '}';
 if_stmt = 'if' ~ cond:bexp 'then' then_stmt:stmt ['else' else_stmt:stmt];
 while_stmt = 'while' cond:bexp 'do' body:stmt;
-assert_stmt = 'assert' cond:bexp;
-assume_stmt = 'assume' cond:bexp;
+assert_stmt = 'assert' '(' cond:bexp ',' prob:num ')';
+assume_stmt = 'assume'  cond:bexp;
 havoc_stmt = 'havoc' vars:var_list;
 
 var_list = ','.{name}+;
@@ -69,10 +69,10 @@ mult = lhs:factor op:'*' ~ rhs:term;
 division = lhs:factor op:'/' ~ rhs:term;
 factor = atom | neg_number | '(' @:aexp ')';
 neg_number = '-' ~ @:number;
-
+num = neg_number | number;
 atom = name | number ;
 func = var:name ':=' nm:fn_name '('  args:args_list ')';
-args_list = @:','.{factor}+;
+args_list = @:','.{num}+;
 fn_name = 'gauss';
 name
     =

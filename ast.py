@@ -103,12 +103,14 @@ class WhileStmt (Stmt):
 
 class AssertStmt (Stmt):
     """Assert statement"""
-    def __init__ (self, cond):
+    def __init__ (self, cond,prob):
         Stmt.__init__(self)
         self.cond = cond
+        self.prob = prob
     def __eq__ (self, other):
         return type(self) == type(other) and \
-            self.cond == other.cond
+            self.cond == other.cond and \
+            self.prob == other.prob
 
 class AssumeStmt (Stmt):
     """Assume statement"""
@@ -204,7 +206,7 @@ class Const (Ast):
         return hash (self.val)
 
 class FloatConst(Const):
-    """An integer constant"""
+    """A Floating constant"""
     def __init__(self, val):
         super (FloatConst, self).__init__ (float (val))
 
@@ -406,8 +408,11 @@ class PrintVisitor (AstVisitor):
         self.visit (node.rhs, no_brkt=True)
 
     def visit_AssertStmt (self, node, *args, **kwargs):
-        self._write ('assert ')
+        self._write ('assert (')
         self.visit (node.cond, no_brkt=True)
+        self._write(',')
+        self.visit (node.prob)
+        self._write(')')
 
     def visit_AssumeStmt (self, node, *args, **kwargs):
         self._write ('assume ')

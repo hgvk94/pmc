@@ -37,6 +37,7 @@ def main ():
     lv=labelVisitor.LabelVisitor()
     b=lv.visit(a,createLabel=True)
     new_func=[]
+    print(lv.prob)
     for f in lv.pd:
     	f.add_bounds(5,6)
     	new_func.append(f)

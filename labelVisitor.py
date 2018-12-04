@@ -14,6 +14,7 @@ class LabelVisitor (ast.AstVisitor):
         self.pre=None
         super (LabelVisitor, self).__init__ ()
         self.labels=[]
+        self.prob=0.00
 
     def print_vars(self):
         st=self.vars[0]
@@ -90,7 +91,7 @@ class LabelVisitor (ast.AstVisitor):
                     self.count=self.count+1 
                     if stmt.__class__.__name__=='WhileStmt':
                         stmt.addInv(self.createLabel(label='inv'))
-                    #the order matters :(
+                    #the order of calling createLabel matters :(
                     if stmt.__class__.__name__=='AssertStmt':
                         l=self.createLabel(error=True)
                     else:
@@ -110,6 +111,8 @@ class LabelVisitor (ast.AstVisitor):
 
     def visit_AssertStmt (self, node, *args, **kwargs):
         #what if Assert occurs inside while loop??
+        #allows only const as prob
+        self.prob=float(node.prob.val)
         return node
 
     def visit_AssumeStmt (self, node, *args, **kwargs):
