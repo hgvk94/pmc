@@ -56,7 +56,6 @@ def main ():
 		pd=PD(lv.pd[0].name,lv.pd[0].args[0],lv.pd[0].args[1])
 		#since we are computing prob(X<x), the last element would be infinity
 		parts=pd.partition(k)
-		print(parts)
 		new_func=[]
 		for f in xrange(len(parts)):
 			if(f==0):
@@ -74,8 +73,6 @@ def main ():
 			#compute lb and ub
 			lv.pd[0].add_bounds(lb,ub)
 			new_func.append(lv.pd[0])
-			print(new_func[0].lb)
-			print(new_func[0].ub)
 			#can use update_rule to make these incremental
 			#initialize fixed point engine
 			s=Fixedpoint()
@@ -104,10 +101,10 @@ def main ():
 			#sat is defined as an element of checkSatResult in z3
 			if s.query(err)==sat:
 				print("satisfiable")
-				print(s.get_answer())
 			else:
 				print("unsatisfiable")
 				agg_prob=agg_prob+1/float(k)
+			print(agg_prob)
 			if(agg_prob>=error_prob):
 				break
 		k=k+1
