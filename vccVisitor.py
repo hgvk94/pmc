@@ -105,7 +105,8 @@ class VCGenVisitor (ast.AstVisitor):
     def visit_Func(self,node,*args,**kwargs):
         for f in self.func_repl:
             if f == node:
-                assert(f.ub or f.lb)
+                if not (f.ub or f.lb):
+                    return
                 if f.ub and f.lb:
                     self._write('( and ')
                 if f.ub:
