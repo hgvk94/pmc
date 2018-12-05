@@ -21,7 +21,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from __future__ import print_function
-
+from z3 import *
 import parser as parser
 import ast as ast
 import vccVisitor
@@ -32,6 +32,12 @@ import sys
 
 def main ():
     a = ast.parse_file (sys.argv [1])
+    #initialize fixed point engine
+    s=Fixedpoint()
+    s.set(engine="spacer")
+    #register relation err
+    err=Bool('Error')
+    s.register_relation(err.decl())
     #initial run of the visitor. Label each node, figure out prob distibutions and error prob
     lv=labelVisitor.LabelVisitor()
     b=lv.visit(a,createLabel=True)
@@ -44,7 +50,8 @@ def main ():
     	f.add_bounds(5,6)
     	new_func.append(f)
 	#begin creating horn clauses 
-	st='(set-option :fixedpoint.engine spacer)\n'
+	#st='(set-option :fixedpoint.engine spacer)\n'
+	st=''
 	#declare relations in SMT2
     rels = lv.get_rel_declr()
     for f in rels:
@@ -58,8 +65,16 @@ def main ():
     pv.visit (b)
     st=pv.out
     #query error
-    st=st+'(query Error)\n'
-    print(st)
-
+    #st=st+'\n(query Error)\n'
+    #print(st)
+    #pass relations and variables and rules to the solver
+    s.parse_string(st)
+    #query error
+    #sat is defined as an element of checkSatResult in z3
+    if s.query(err)==sat:
+    	print("satisfiable")
+    	print(s.get_answer())
+    else:
+    	print("unsatisfiable")
 if __name__ == '__main__':
     main ()

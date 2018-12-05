@@ -124,7 +124,6 @@ class AssumeStmt (Stmt):
 class Func (Stmt):
     """Function call"""
     def __init__(self,var,name,args):
-        print("calling a function")
         Stmt.__init__(self)
         self.args = args
         #the name is parsed as a variable
