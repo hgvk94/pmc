@@ -46,6 +46,7 @@ class StmtList(Ast):
 class Stmt (Ast):
     """A single statement"""
     def __init__(self):
+        self.shouldSkip=False
         self.pre_label=None
         self.post_label=None
     def addPre(self,pre):
@@ -116,6 +117,7 @@ class AssumeStmt (Stmt):
     """Assume statement"""
     def __init__ (self, cond):
         Stmt.__init__(self)
+        self.shouldSkip=True
         self.cond = cond
     def __eq__ (self, other):
         return type(self) == type(other) and \
@@ -125,7 +127,7 @@ class Func (Stmt):
     """Function call"""
     def __init__(self,var,name,args):
         Stmt.__init__(self)
-        self.args = args
+        self.args = [a.val for a in args]
         #the name is parsed as a variable
         #the function name is the variable's name
         self.name = name
@@ -147,6 +149,7 @@ class HavocStmt (Stmt):
     """Havoc statement"""
     def __init__ (self, var_list):
         Stmt.__init__(self)
+        self.shouldSkip=True
         self.vars = var_list
     def __eq__ (self, other):
         return type(self) == type(other) and \
@@ -396,9 +399,9 @@ class PrintVisitor (AstVisitor):
             self._write(')')
         else:
             for s in node.args[0:-1]:
-                self.visit(s)
+                self._write(' '+str(s))
                 self._write(',')
-            self.visit(node.args[-1])
+            self._write(str(node.args[-1]))
             self._write(')')
 
     def visit_AsgnStmt (self, node, *args, **kwargs):

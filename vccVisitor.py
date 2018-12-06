@@ -8,8 +8,9 @@ for now, just print the horn clauses.
 """
 class VCGenVisitor (ast.AstVisitor):
     """A VC gen visitor"""
-    def __init__ (self, out = None,func_repl=None):
+    def __init__ (self, out = None,func_repl=None,reverse_cond=False):
         super (VCGenVisitor, self).__init__ ()
+        self.reverse_cond=reverse_cond
         self.func_repl=func_repl
         if out is None:
             self.out = sys.stdout
@@ -46,8 +47,9 @@ class VCGenVisitor (ast.AstVisitor):
         if kwargs['negate']:
             self._write(' ( not')
         if node.is_unary ():
-            self._write (node.op)
+            self._write ('( ' + node.op)
             self.visit (node.arg (0))
+            self._write(' )')
         else:
             self._write ('( ')
             self._write (node.op)
@@ -60,6 +62,17 @@ class VCGenVisitor (ast.AstVisitor):
         if kwargs['negate']:
             self._write(' )')
 
+    def create_pre_label(self, node):
+        if node.pre_label:
+            self._write('( rule (=> ( and ')
+            self._write(node.pre_label+ ' ')
+            self.visit (node)
+            self._write(') ' + node.post_label + '))')
+        else:
+            self._write('( rule (=> ')
+            self.visit (node)
+            self._write(node.post_label + '))')
+
     def visit_StmtList (self, node, *args, **kwargs):
         if node.stmts is None or len (node.stmts) == 0:
             return
@@ -68,19 +81,19 @@ class VCGenVisitor (ast.AstVisitor):
 
         self._indent (indent=indent_lvl)
         #if stmt0 has precond, assert it
-        if node.stmts[0].pre_label and kwargs['create_horn']:
+        if node.stmts[0].pre_label and kwargs['create_horn'] and not node.stmts[0].shouldSkip:
                 self._write( '( rule ' + node.stmts[0].pre_label +' )\n')
-        if kwargs['create_horn']:
+        if kwargs['create_horn'] and not node.stmts[0].shouldSkip :
             self._write('( rule (=> ')
         self.visit (node.stmts[0])
-        if kwargs['create_horn']:
+        if kwargs['create_horn'] and not node.stmts[0].shouldSkip:
             #top level statement
             self._write(' '+node.stmts[0].post_label + ' ))')
 
         if len (node.stmts) > 1:
             for s in node.stmts[1:]:
                 #TODO this does not support nested while loops
-                if kwargs['create_horn']:
+                if kwargs['create_horn'] and not s.shouldSkip:
                     self._write ('\n')
                     if s.__class__.__name__ == 'WhileStmt':
                         #post label holds after exit
@@ -95,10 +108,8 @@ class VCGenVisitor (ast.AstVisitor):
                         self._write(' ) ' + s.inv + ' ))')
                     else : 
                         #pre label and condition implies post label
-                        self._write('( rule (=> ( and ')
-                        self._write(s.pre_label+ ' ')
-                        self.visit (s)
-                        self._write(') ' + s.post_label + '))')
+                        self.create_pre_label(s)
+                        
                 else:
                     self.visit(s)
 
@@ -124,9 +135,11 @@ class VCGenVisitor (ast.AstVisitor):
         self._write(' )')
 
     def visit_AssertStmt (self, node, *args, **kwargs):
-        self.visit (node.cond,negate=True)
+        self.visit (node.cond,negate=(not self.reverse_cond))
 
     def visit_AssumeStmt (self, node, *args, **kwargs):
+        sys.stderr.write("Assumes not supported")
+        assert(False)
         self._write ('assume ')
         self.visit (node.cond, no_brkt=True)
 

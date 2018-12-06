@@ -1,0 +1,64 @@
+havoc lck,tot,old;
+if (lck = 0) 
+then
+  lck1 := 1
+else
+   lck1 := lck;
+old := tot;
+havoc req;
+if (not req=0)
+then
+  {
+  if (lck1=1) 
+  then
+  	lck2 := 0
+  else
+  	lck2:=lck1;
+  tot2 := tot+1
+  }
+else
+  {
+  tot2 := tot;
+  lck2 := lck1
+  };
+havoc tot3, tot4, old3,lck4,lck5,old2, temp;
+if temp = 0
+then
+  {
+  tot4 := tot2;
+  old3 := tot4;
+  lck5 := lck2
+  }
+else
+  {
+  tot4 := tot3;
+  old3 := old2;
+  lck5 := lck4
+  };
+while(not tot4 = old3)
+do
+{
+if (lck2 = 0)
+then
+  lck3 := 1
+else
+  lck3 := lck2;
+old2 := tot2;
+havoc req2;
+if (not req2=0)
+then
+  {
+    if (lck3=1) 
+    then
+      lck4 := 0
+    else
+      lck4:=lck3;
+    tot3 := tot2+1
+  }
+else
+  {
+    tot3 := tot2;
+    lck4 := lck3
+  }
+};
+assert(not(lck5=0),1)

@@ -19,7 +19,7 @@ class LabelVisitor (ast.AstVisitor):
     def print_vars(self):
         st=self.vars[0]
         for v in self.vars[1:]:
-            st=st+' '+v
+            st=st+' '+str(v)
         return st
     def add_var(self,v):
         if not v in self.vars:
@@ -71,7 +71,7 @@ class LabelVisitor (ast.AstVisitor):
             return
     
         stmt=self.visit(node.stmts[0])
-        if kwargs['createLabel']:
+        if kwargs['createLabel'] and not node.stmts[0].shouldSkip :
             self.count=self.count+1
             if stmt.__class__.__name__=='WhileStmt':
                 inv=self.createLabel(label='inv')
@@ -86,7 +86,7 @@ class LabelVisitor (ast.AstVisitor):
         if len (node.stmts) > 1:
             for s in node.stmts[1:]:
                 stmt=self.visit(s)
-                if kwargs['createLabel']:
+                if kwargs['createLabel'] and not s.shouldSkip:
                     stmt.addPre(self.pre)
                     self.count=self.count+1 
                     if stmt.__class__.__name__=='WhileStmt':
@@ -121,7 +121,7 @@ class LabelVisitor (ast.AstVisitor):
 
     def visit_HavocStmt (self, node, *args, **kwargs):
         for v in node.vars:
-            self.add_var(node.vars)
+            self.add_var(v.name)
         return node
 
     def visit_IfStmt (self, node, *args, **kwargs):
