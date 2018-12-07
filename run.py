@@ -58,7 +58,6 @@ def model_check_labelled_prog(rel_decl,vars_decl,labelled_ast,replacement_func,t
 	pv = vccVisitor.VCGenVisitor (out=st,func_repl=replacement_func,reverse_cond=toggle)
 	pv.visit (labelled_ast)
 	st=pv.out
-	print(st)
 	#pass relations and variables and rules to the solver
 	s.parse_string(st)
 	#query error
