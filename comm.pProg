@@ -1,9 +1,9 @@
 havoc sent_bit;
-n:=gauss(0,3);
+n:=gauss(0,1);
 received_sig:=sent_bit+n;
 if received_sig>0.5
 then 
 	received_bit := 1
 else
 	received_bit := 0;
-assert((not(sent_bit=1 or sent_bit=0) or sent_bit=received_bit),0.9)
+assert((not(sent_bit=1 or sent_bit=0) or sent_bit=received_bit),0.2)

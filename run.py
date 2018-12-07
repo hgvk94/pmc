@@ -32,13 +32,13 @@ import sys
 class PD ():
 	def __init__ (self,nm ,p1=None,p2=None):
 		#pd_obj can only be norm for now. change depending on nm
-		self.pd_obj = scipy.stats.norm
+		self.pd_obj = scipy.stats.norm(loc=p1,scale=p2)
 		self.mean=p1
 		self.sd=p2
 	#partition into k spaces
 	def partition(self,k):
 		delta=1/float(k)
-		return [self.pd_obj.ppf(delta*float(x),loc=self.mean,scale=self.sd) for x in xrange(1,k+1)]
+		return [self.pd_obj.ppf(delta*float(x)) for x in xrange(1,k+1)]
 def model_check_labelled_prog(rel_decl,vars_decl,labelled_ast,replacement_func,toggle):
 	#initialize fixed point engine
 	s=Fixedpoint()
