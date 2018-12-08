@@ -117,7 +117,6 @@ class AssumeStmt (Stmt):
     """Assume statement"""
     def __init__ (self, cond):
         Stmt.__init__(self)
-        self.shouldSkip=True
         self.cond = cond
     def __eq__ (self, other):
         return type(self) == type(other) and \

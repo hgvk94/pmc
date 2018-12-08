@@ -27,6 +27,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import parser as parser
 import ast as ast
+import time
 import vccVisitor
 import labelVisitor
 import semantics as sem
@@ -68,12 +69,14 @@ def model_check_labelled_prog(rel_decl,vars_decl,labelled_ast,replacement_func,t
 	return s.query(err)
 
 def main ():
+	start=time.time()
 	ini_ast= ast.parse_file (sys.argv [1])
 	agg_prob_safe=-1
 	agg_prob_unsafe=-1
 	#initial run of the visitor. Label each node, figure out prob distibutions and error prob
 	lv=labelVisitor.LabelVisitor()
 	lb_ast=lv.visit(ini_ast,createLabel=True)
+	print(lb_ast)
 	#no random variables. Either the property holds or does not.
 	if(not lv.pd):
 		print("no random variables, treating all variables as non deterministic")
@@ -161,6 +164,8 @@ def main ():
 		if(len(blue_points)>0):
 			print_bounds(blue_points,1/float(k),'blue')
 		k=k+1
+	end=time.time()
+	print("Time taken" + str(end-start))
 def print_bounds(points,height,col):
 	plt.xlabel('X values')
 	plt.ylabel('Probabilities')

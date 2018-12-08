@@ -62,7 +62,7 @@ class VCGenVisitor (ast.AstVisitor):
         if kwargs['negate']:
             self._write(' )')
 
-    def create_pre_label(self, node):
+    def create_horn(self, node):
         if node.pre_label:
             self._write('( rule (=> ( and ')
             self._write(node.pre_label+ ' ')
@@ -108,7 +108,7 @@ class VCGenVisitor (ast.AstVisitor):
                         self._write(' ) ' + s.inv + ' ))')
                     else : 
                         #pre label and condition implies post label
-                        self.create_pre_label(s)
+                        self.create_horn(s)
                         
                 else:
                     self.visit(s)
@@ -139,9 +139,7 @@ class VCGenVisitor (ast.AstVisitor):
         self.visit (node.cond,negate=(not self.reverse_cond))
 
     def visit_AssumeStmt (self, node, *args, **kwargs):
-        sys.stderr.write("Assumes not supported")
-        assert(False)
-        self._write ('assume ')
+        #assume is handled just like an assignment except it's can be condition rather than an equality
         self.visit (node.cond, no_brkt=True)
 
     def visit_HavocStmt (self, node, *args, **kwargs):

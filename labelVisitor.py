@@ -44,7 +44,7 @@ class LabelVisitor (ast.AstVisitor):
         #TODO support types as well
         declare_var_strings=[]
         for v in self.vars:
-            declare_var_strings.append('(declare-var '+v + ' Int)')
+            declare_var_strings.append('(declare-var '+v + ' Real)')
         return declare_var_strings
 
     def get_rel_declr(self):
@@ -58,9 +58,9 @@ class LabelVisitor (ast.AstVisitor):
             return label_string
         label_string='( '+label+str(self.count)+' '+self.print_vars()+' )'
         self.pre=label_string
-        label_def='(declare-rel ' + label+str(self.count)+' (Int'
+        label_def='(declare-rel ' + label+str(self.count)+' (Real'
         for f in self.vars[1:]:
-            label_def=label_def+' Int'
+            label_def=label_def+' Real'
         label_def=label_def+') )'
         self.labels.append(label_def)
         return label_string
@@ -116,7 +116,6 @@ class LabelVisitor (ast.AstVisitor):
         return node
 
     def visit_AssumeStmt (self, node, *args, **kwargs):
-        #what if Assume occurs inside while loop??
         return node
 
     def visit_HavocStmt (self, node, *args, **kwargs):

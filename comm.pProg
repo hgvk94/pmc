@@ -1,9 +1,14 @@
-sent_bit:=0;
-n:=gauss(0,1);
+havoc sent_bit,nd;
+if nd=0
+then
+ sent_bit:=0
+else
+ sent_bit:=1;
+n:=gauss(0,0.1);
 received_sig:=sent_bit+n;
 if received_sig>0.5
 then 
 	received_bit := 1
 else
 	received_bit := 0;
-assert((sent_bit=received_bit),0.5)
+assert((sent_bit=received_bit),0.2)
