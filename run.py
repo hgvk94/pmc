@@ -70,13 +70,14 @@ def model_check_labelled_prog(rel_decl,vars_decl,labelled_ast,replacement_func,t
 	#query error
 	return s.query(err)
 def parse_args():
-	opts,args=getopt.getopt(sys.argv,"v:s")
+	#assuming that the input file is always given as first argument
+	opts,args=getopt.getopt(sys.argv[2:],'sv:')
 	verb=0
 	show=False
 	for opt,arg in opts:
-		if opt=='-v':
+		if opt=="-v":
 			verb=int(arg)
-		if opt=='-s':
+		if opt=="-s":
 			show=True
 	return verb,show
 def main ():
