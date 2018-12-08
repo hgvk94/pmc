@@ -7,4 +7,4 @@ then
 	received_bit := 1
 else
 	received_bit := 0;
-assert((sent_bit=received_bit),0.2)
+assert((sent_bit=received_bit),0.1)
