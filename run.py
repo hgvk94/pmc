@@ -22,12 +22,16 @@
 
 from __future__ import print_function
 from z3 import *
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
 import parser as parser
 import ast as ast
 import vccVisitor
 import labelVisitor
 import semantics as sem
 import scipy.stats
+import numpy
 import sys
 class PD ():
 	def __init__ (self,nm ,p1=None,p2=None):
@@ -96,19 +100,31 @@ def main ():
 		#since we are computing prob(X<x), the last element would be infinity
 		parts=pd.partition(k)
 		new_func=[]
+		red_points=[]
+		blue_points=[]
 		for f in xrange(len(parts)):
+			prop_valid=True
 			if(f==0):
 				lb=None
 				if scipy.isinf(parts[f]):
 					ub=None
 				else:
-					ub=int(parts[f])
+					ub=float(parts[f])
 			elif(f==len(parts)-1):
 				ub=None
-				lb=int(parts[f-1])
+				lb=float(parts[f-1])
 			else:
-				lb=int(parts[f-1])
-				ub=int(parts[f])
+				lb=float(parts[f-1])
+				ub=float(parts[f])
+			if lb:
+				lbp=lb
+			else:
+				lbp=-100000
+			if ub:
+				ubp=ub
+			else:
+				ubp=100000
+			print("trying bounds "+str(lbp)+" "+str(ubp))
 			#compute lb and ub
 			lv.pd[0].add_bounds(lb,ub)
 			new_func.append(lv.pd[0])
@@ -120,6 +136,9 @@ def main ():
 			if res==unsat:
 				agg_prob_unsafe=agg_prob_unsafe+1/float(k)
 				print("Unsafe with probability " + str(agg_prob_unsafe))
+				for x in numpy.arange(lbp,ubp,(float(ubp)-float(lbp))/100):
+					red_points.append(x)
+				prop_valid=False
 			if(agg_prob_unsafe>=(1-error_prob)):
 				print("system is NOT SAFE with the desired propbability")
 				break
@@ -129,11 +148,24 @@ def main ():
 			res=model_check_labelled_prog(lv.get_rel_declr(),lv.get_var_declr(),lb_ast,new_func,toggle)
 			#unsat is defined as an element of checkSatResult in z3
 			if  res==unsat:
+				assert(prop_valid)
 				agg_prob_safe=agg_prob_safe+1/float(k)
 				print("Safe with probability " + str(agg_prob_safe))
+				for x in numpy.arange(lbp,ubp,(float(ubp)-float(lbp))/100):
+					blue_points.append(x)
 			if(agg_prob_safe>=error_prob):
 				print("system is SAFE with the desired propbability")
 				break
+		if(len(red_points)>0):
+			print_bounds(red_points,1/float(k),'red')
+		if(len(blue_points)>0):
+			print_bounds(blue_points,1/float(k),'blue')
 		k=k+1
+def print_bounds(points,height,col):
+	plt.xlabel('X values')
+	plt.ylabel('Probabilities')
+	y_values=[height for x in points]
+	plt.plot(points,y_values,'o',color=col)
+	plt.show()
 if __name__ == '__main__':
 	main ()

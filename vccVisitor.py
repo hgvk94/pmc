@@ -126,6 +126,7 @@ class VCGenVisitor (ast.AstVisitor):
                     self._write('(>= ' + node.var.name +' ' +str(f.lb) + ') ')
                 if f.ub and f.lb:
                     self._write(' )')
+                return
 
     def visit_AsgnStmt (self, node, *args, **kwargs):
         self._write ('( = ')
